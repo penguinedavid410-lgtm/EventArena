@@ -1,4 +1,4 @@
-# EventArena — test conversations
+# N-EventArena — test conversations
 
 These are test prompts, not screenshots or evidence of a live run. Launch the Streamlit app and capture your own screenshots.
 
@@ -6,7 +6,7 @@ These are test prompts, not screenshots or evidence of a live run. Launch the St
 
 Expected wording:
 
-> Hello! Welcome to EventArena.
+> Hello! Welcome to N-EventArena.
 >
 > Do you want to ask about one of these suggestions?
 >
