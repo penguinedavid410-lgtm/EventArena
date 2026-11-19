@@ -4,12 +4,12 @@ import joblib
 import streamlit as st
 from train_model import MODEL, THRESHOLD, train_and_save
 
-st.set_page_config(page_title="EventArena", page_icon="🎟️", layout="centered")
+st.set_page_config(page_title="EventArena | Event discovery", page_icon="🎟️", layout="centered")
 if not MODEL.exists():
     train_and_save()
 classifier = joblib.load(MODEL)
 
-# Fictional sample records for coursework demonstration only.
+# Fictional sample records for coursework demonstration, not live event listings.
 EVENTS = [
     {"name":"Kigali City Football Final","category":"sports","date":"22 Nov 2026","venue":"Amahoro Stadium","price":5},
     {"name":"East Africa Basketball Night","category":"sports","date":"24 Nov 2026","venue":"BK Arena","price":8},
@@ -20,97 +20,121 @@ EVENTS = [
     {"name":"Community Movie Evening","category":"cheap","date":"21 Nov 2026","venue":"Kimironko Community Hall","price":0},
     {"name":"Open-Air Fitness Meetup","category":"cheap","date":"26 Nov 2026","venue":"Kigali Sports Park","price":1},
 ]
-OPTIONS = [
-    ("🏟️ Sports events", "Show me upcoming sports events."),
-    ("🎵 Concerts", "Show me upcoming concerts."),
-    ("🎉 Festivals", "Show me upcoming festivals."),
-    ("💸 Cheap or free events", "Show me affordable and free events."),
-    ("ℹ️ Event information", "How can I get an event date, venue, or ticket price?"),
-    ("❓ Help", "What can you help me with?"),
+SUGGESTIONS = [
+    ("Sports events", "What sports events are coming up?"),
+    ("Concerts", "Which concerts can I attend?"),
+    ("Festivals", "What festivals are happening?"),
+    ("Cheap or free events", "What free or low-cost events are available?"),
+    ("Event information", "How do I find an event's date, venue and ticket price?"),
 ]
 
 def detect_rule(text):
+    value = text.lower().strip()
     rules = [
         ("greeting", r"^(hi|hello|hey|good morning|good afternoon|good evening)\b"),
         ("goodbye", r"\b(bye|goodbye|exit|quit|farewell)\b"),
         ("help", r"\b(help|what can you do|how do i use)\b"),
-        ("sports", r"\b(sports? events?|football|basketball|tennis|rugby)\b"),
-        ("concerts", r"\b(concerts?|music events?|gigs?)\b"),
-        ("festivals", r"\b(festivals?|carnivals?)\b"),
-        ("cheap", r"\b(cheap|free|budget|low[- ]cost)\b"),
+        ("event_details", r"\b(date|venue|ticket price|entry fee|how much|where is|when is|details)\b"),
+        ("sports", r"\b(sports? events?|football|basketball|tennis|rugby|matches?)\b"),
+        ("concerts", r"\b(concerts?|live music|music events?|gigs?|performers?)\b"),
+        ("festivals", r"\b(festivals?|carnivals?|cultural fairs?)\b"),
+        ("cheap", r"\b(cheap|free|budget|low[- ]cost|affordable|inexpensive)\b"),
     ]
     for intent, pattern in rules:
-        if re.search(pattern, text.lower().strip()):
+        if re.search(pattern, value):
             return intent
     return None
 
+def list_events(intent):
+    found = [event for event in EVENTS if event["category"] == intent]
+    if intent == "cheap":
+        found = [event for event in EVENTS if event["price"] <= 5]
+    heading = {"sports":"Upcoming sports events","concerts":"Upcoming concerts",
+               "festivals":"Upcoming festivals","cheap":"Affordable and free activities"}[intent]
+    lines = [f"- **{event['name']}** — {event['date']} | {event['venue']} | {event['price']} USD" for event in found]
+    return heading + "\n\n" + "\n".join(lines) + "\n\n*Fictional sample listings for coursework; not verified live events.*"
+
+def event_details(message):
+    lowered = message.lower()
+    for event in EVENTS:
+        if event["name"].lower() in lowered:
+            return (f"**{event['name']}**\n\n- **Date:** {event['date']}\n"
+                    f"- **Venue:** {event['venue']}\n- **Ticket price:** {event['price']} USD\n\n"
+                    "*Fictional sample listing for coursework.*")
+    names = "\n".join(f"- {event['name']}" for event in EVENTS)
+    return ("I can provide the date, venue and ticket price for a listed sample event. Which event would you like to know about?\n\n"
+            + names + "\n\nFor example: **When is Acoustic Live Sessions?**")
+
 def answer(intent, message):
     if intent == "greeting":
-        return "Hello! Welcome to EventArena. How can I help you today? Please choose one of the options below."
+        return ("Hello! Welcome to EventArena.\n\nDo you want to ask about one of these suggestions?\n\n"
+                + "\n".join(f"{i}. **{question}**" for i, (_, question) in enumerate(SUGGESTIONS, 1))
+                + "\n\nYou can also select **Help** or type your own question.")
     if intent == "help":
-        return "I can help with sports events, concerts, festivals, cheap or free events, and event date, venue, and ticket price. Choose an option or type a question."
+        return ("**How EventArena can help**\n\nChoose one of the five suggested questions to browse sports, concerts, "
+                "festivals, affordable activities, or event details. You can type an event name to see its sample date, "
+                "venue and ticket price. If a question is outside these topics, I will let you know rather than guess.")
     if intent == "goodbye":
-        return "Thanks for visiting EventArena. Have a great day!"
+        return "Thank you for using EventArena. Have a great day!"
     if intent == "event_details":
-        text = message.lower()
-        for item in EVENTS:
-            if item["name"].lower() in text:
-                return (f"**{item['name']}**\n\n- Date: {item['date']}\n- Venue: {item['venue']}\n"
-                        f"- Ticket price: {item['price']} USD")
-        return "Please include the event name. Example: **When is Acoustic Live Sessions?**"
-    matches = [item for item in EVENTS if item["category"] == intent or (intent == "cheap" and item["price"] <= 5)]
-    if not matches:
-        return "I don't have a matching sample listing. Please choose one of the categories shown above."
-    heading = {"sports":"🏟️ Upcoming sports events","concerts":"🎵 Upcoming concerts",
-               "festivals":"🎉 Upcoming festivals","cheap":"💸 Cheap or free events"}[intent]
-    rows = [f"- **{x['name']}** — {x['date']} · {x['venue']} · {x['price']} USD" for x in matches]
-    return heading + "\n\n" + "\n".join(rows) + "\n\n*Fictional sample listings for coursework; not verified live events.*"
+        return event_details(message)
+    if intent in ("sports", "concerts", "festivals", "cheap"):
+        return list_events(intent)
+    return "I can help with sports, concerts, festivals, affordable events and event details. Please choose a suggestion or select Help."
 
 def respond(message):
     rule = detect_rule(message)
     if rule:
         return answer(rule, message), f"rule:{rule}", 1.0
     probabilities = classifier.predict_proba([message])[0]
-    idx = probabilities.argmax()
-    intent, confidence = classifier.classes_[idx], float(probabilities[idx])
+    index = probabilities.argmax()
+    intent = classifier.classes_[index]
+    confidence = float(probabilities[index])
     if confidence < THRESHOLD:
-        return ("Sorry, I didn't understand that. I can help with sports, concerts, festivals, cheap or free events, "
-                "event information, and help. Please choose an option below.",
+        return ("I'm sorry, that question is outside the areas I can help with. Please ask about sports, concerts, "
+                "festivals, affordable events or event details, or select **Help**.",
                 "fallback:low_confidence", confidence)
     return answer(intent, message), f"classifier:{intent}", confidence
 
 st.title("🎟️ EventArena")
-st.caption("Your simple guide to discovering events.")
+st.caption("Discover sports, live music, festivals and affordable activities.")
 if "messages" not in st.session_state:
-    welcome = ("Hello! Welcome to EventArena. How can I help you today?\n\n"
-               "Please choose one of the following options:\n\n" +
-               "\n".join(f"{i+1}. {label}" for i, (label, _) in enumerate(OPTIONS)))
-    st.session_state.messages = [{"role":"assistant","content":welcome}]
+    opening = ("Hello! Welcome to EventArena.\n\nDo you want to ask about one of these suggestions?\n\n"
+               + "\n".join(f"{i}. **{question}**" for i, (_, question) in enumerate(SUGGESTIONS, 1))
+               + "\n\nYou can also select **Help** or type your own question.")
+    st.session_state.messages = [{"role":"assistant","content":opening}]
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-        if msg.get("route"):
-            st.caption(f"Handled by {msg['route']} · confidence {msg['confidence']:.2f}")
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+        if message.get("route"):
+            st.caption(f"Handled by {message['route']} | confidence {message['confidence']:.2f}")
 
-def submit(text):
-    reply, route, confidence = respond(text)
+def submit_message(text):
+    response, route, confidence = respond(text)
     st.session_state.messages.append({"role":"user","content":text})
-    st.session_state.messages.append({"role":"assistant","content":reply,"route":route,"confidence":confidence})
+    st.session_state.messages.append({"role":"assistant","content":response,"route":route,"confidence":confidence})
 
-st.subheader("Choose what you need")
-cols = st.columns(2)
-for i, (label, question) in enumerate(OPTIONS):
-    if cols[i % 2].button(label, key=f"option_{i}", use_container_width=True):
-        submit(question)
+st.subheader("Suggested questions")
+st.caption("Choose a question to see the matching event information.")
+columns = st.columns(2)
+for index, (label, question) in enumerate(SUGGESTIONS):
+    if columns[index % 2].button(label, key=f"suggestion_{index}", use_container_width=True):
+        submit_message(question)
         st.rerun()
-typed = st.chat_input("Or type a question about events...")
-if typed:
-    submit(typed)
+
+help_col, _ = st.columns(2)
+if help_col.button("Help", key="help_button", use_container_width=True):
+    submit_message("Help")
+    st.rerun()
+
+typed_question = st.chat_input("Or type your own question about events...")
+if typed_question:
+    submit_message(typed_question)
     st.rerun()
 
 with st.sidebar:
-    st.subheader("Questions I can answer")
-    st.markdown("- Sports events\n- Concerts\n- Festivals\n- Cheap or free events\n- Event date, venue, and ticket price\n- Help and greetings")
-    st.caption(f"Classifier confidence threshold: {THRESHOLD:.2f} (provisional)")
-    st.caption("Sample listings are fictional, not live listings.")
+    st.subheader("Available topics")
+    st.markdown("- Sports events\n- Concerts\n- Festivals\n- Cheap or free events\n- Event date, venue and ticket price")
+    st.caption(f"Intent classifier threshold: {THRESHOLD:.2f} (provisional)")
+    st.caption("Event listings are fictional coursework examples, not live listings.")
