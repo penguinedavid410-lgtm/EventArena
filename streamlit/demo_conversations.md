@@ -1,20 +1,40 @@
-# Live demonstration scripts
+# EventArena — live test scripts
 
-These are test scripts, not screenshots or proof of a live run. Run the app and record the actual route and confidence displayed for each input. Capture genuine screenshots of two separate conversations for your assessment.
+These are test scripts, not screenshots or evidence of a live run. Launch the app and capture your own screenshots with route/confidence captions visible.
 
-## Conversation 1 — event discovery
+## Opening message
 
-1. `Hello` — expected greeting rule.
-2. `who is performing this month?` — intended classifier test (does not contain the rule keywords for concerts).
-3. `I'd love to visit a local fair` — intended classifier test (the rule list does not include “fair”).
-4. `I need something affordable` — intended classifier test (the rule list does not include “affordable”).
-5. `tell me about upcoming competitions` — intended classifier test; check actual predicted class and confidence.
+> Hello! Welcome to EventArena. How can I help you today?
+>
+> Please choose one of the following options:
+> 1. Sports events
+> 2. Concerts
+> 3. Festivals
+> 4. Cheap or free events
+> 5. Event information
+> 6. Help
 
-## Conversation 2 — help and fallback
+## Conversation 1 — event discovery and classifier paraphrases
 
-1. `What can you do?` — help rule.
-2. `Can you book me a flight to the moon?` — intended out-of-domain test; check whether the model confidence is below threshold. If not, note the limitation and test another unrelated phrase.
-3. `show upcoming rugby fixtures` — sports rule.
-4. `goodbye` — goodbye rule.
+1. `Hello` — expected rule:greeting.
+2. `who is performing this month?` — classifier test for concerts.
+3. `I'd love to visit a local fair` — classifier test for festivals.
+4. `activities that won't break the bank` — classifier test for cheap events.
+5. `When is Acoustic Live Sessions?` — classifier test for event_details.
 
-At least three paraphrases must be visibly handled by the classifier rather than the rules. Keep the app's route/confidence captions visible in screenshots.
+Verify that at least three actually display `classifier:` rather than `rule:`.
+
+## Conversation 2 — menu, help, and fallback
+
+1. Select Sports events — expected sports response.
+2. `What can you help me with?` — expected help response.
+3. `Can you diagnose my car and calculate my tax?` — intended out-of-scope test; record the actual result. If accepted by the classifier, note the limitation and test another unrelated phrase.
+4. `Goodbye` — expected goodbye response.
+
+## Evidence checklist
+
+- [ ] Capture the welcome message and six choices.
+- [ ] Capture two separate conversations.
+- [ ] Show at least three classifier-handled paraphrases.
+- [ ] Show one fallback response.
+- [ ] Do not present fictional sample events as verified live listings.
