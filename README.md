@@ -1,27 +1,41 @@
 # EventArena — Portfolio Project 2, Part 2
 
-A Streamlit event-discovery chatbot demonstrating hybrid rule-based and machine-learning intent detection. It uses a TF-IDF + Logistic Regression classifier trained from a reproducible synthetic dataset, with a confidence threshold and an out-of-scope fallback.
+EventArena is a focused Streamlit chatbot for discovering sample sports events, concerts, festivals, and affordable activities. It demonstrates hybrid intent recognition: keyword rules for obvious phrases, a TF-IDF + Logistic Regression classifier for paraphrases, and a low-confidence fallback.
+
+## What users see first
+
+> Hello! Welcome to EventArena. How can I help you today?
+
+The chatbot displays six selectable choices: Sports events, Concerts, Festivals, Cheap or free events, Event information (date, venue, ticket price), and Help. Users can also type their own question. The assistant stays within these topics and falls back on unsupported questions.
 
 ## Run locally
 
 ```bash
 cd streamlit
 python -m venv .venv
+# Windows: .venv\\Scripts\\activate
+# macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 python train_model.py
 streamlit run app.py
 ```
 
-The training script creates intents.csv, intent_classifier.joblib, and evaluation_report.md. The app also trains the model automatically on first launch if the model file is missing.
+The training script creates `intents.csv`, `intent_classifier.joblib`, and `evaluation_report.md`. If the model is missing, the app trains it automatically on first launch.
 
-## Structure
-- streamlit/app.py — chatbot UI, rules, classifier integration, confidence fallback, and sample event responses.
-- streamlit/train_model.py — synthetic data generation, grouped train/test split, training, and evaluation.
-- streamlit/demo_conversations.md — two conversation scripts and classifier-only paraphrase tests.
-- streamlit/requirements.txt — dependencies.
+## Deploy on Streamlit Community Cloud
 
-## Streamlit deployment
-Push this repository to GitHub, create an app in Streamlit Community Cloud, select this repository, set the main file path to streamlit/app.py, and deploy. No API key or bot token is required.
+1. Sign in to Streamlit Community Cloud.
+2. Click **New app** and select this GitHub repository.
+3. Select branch `main`.
+4. Set **Main file path** to `streamlit/app.py`.
+5. Deploy. Dependencies are in `streamlit/requirements.txt`.
 
-## Notes
-The synthetic dataset is educational test material, not real user data. Review evaluation_report.md after training and discuss limitations of synthetic data. Run the app and capture genuine screenshots of at least two separate conversations for your portfolio; the supplied demo scripts are not screenshots or proof of a live run. Never commit passwords, access tokens, or private user data.
+No API key or bot token is required.
+
+## Assessment evidence
+
+Use `streamlit/demo_conversations.md` for two test scripts. Run the app and capture genuine screenshots of the welcome menu, at least three classifier-handled paraphrases, a fallback, and two separate conversations. The app displays route and confidence below assistant replies.
+
+## Limitations
+
+Event listings are fictional sample records, not live listings. The classifier uses synthetic authored examples; report the score from your own training run. The confidence threshold is provisional and not a production guarantee. Never commit credentials or private information.
