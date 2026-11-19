@@ -111,11 +111,10 @@ def submit_message(text):
     st.session_state.messages.append({"role":"user","content":text})
     st.session_state.messages.append({"role":"assistant","content":response,"route":route,"confidence":confidence})
 
-st.subheader("Suggested questions")
 st.caption("Choose a question to see the matching event information.")
 columns = st.columns(2)
 for index, (label, question) in enumerate(SUGGESTIONS):
-    if columns[index % 2].button(label, key=f"suggestion_{index}", use_container_width=True):
+    if columns[index % 2].button(question, key=f"suggestion_{index}", use_container_width=True):
         submit_message(question)
         st.rerun()
 
