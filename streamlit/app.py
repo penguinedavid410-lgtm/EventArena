@@ -4,7 +4,7 @@ import joblib
 import streamlit as st
 from train_model import MODEL, THRESHOLD, train_and_save
 
-st.set_page_config(page_title="EventArena | Event discovery", page_icon="🎟️", layout="centered")
+st.set_page_config(page_title="N-EventArena | Event discovery", page_icon="🎟️", layout="centered")
 if not MODEL.exists():
     train_and_save()
 classifier = joblib.load(MODEL)
@@ -67,18 +67,20 @@ def event_details(message):
 
 def answer(intent, message):
     if intent == "greeting":
-        return ("Hello! Welcome to EventArena.\n\nChoose one of the questions below, select **Help**, or type your own question.")
+        return ("Hello! Welcome to N-EventArena.\n\nHere are some questions you can ask:\n\n"
+                + "\n".join(f"{i}. {question}" for i, (_, question) in enumerate(SUGGESTIONS, 1))
+                + "\n\nSelect **Help** or type your own question.")
     if intent == "help":
-        return ("**How EventArena can help**\n\nChoose one of the five suggested questions to browse sports, concerts, "
+        return ("**How N-EventArena can help**\n\nYou can ask about sports, concerts, "
                 "festivals, affordable activities, or event details. You can type an event name to see its sample date, "
                 "venue and ticket price. If a question is outside these topics, I will let you know rather than guess.")
     if intent == "goodbye":
-        return "Thank you for using EventArena. Have a great day!"
+        return "Thank you for using N-EventArena. Have a great day!"
     if intent == "event_details":
         return event_details(message)
     if intent in ("sports", "concerts", "festivals", "cheap"):
         return list_events(intent)
-    return "I can help with sports, concerts, festivals, affordable events and event details. Please choose a suggestion or select Help."
+    return "I can help with sports, concerts, festivals, affordable events and event details. Please type a question about one of these topics or select Help."
 
 def respond(message):
     rule = detect_rule(message)
@@ -94,10 +96,12 @@ def respond(message):
                 "fallback:low_confidence", confidence)
     return answer(intent, message), f"classifier:{intent}", confidence
 
-st.title("🎟️ EventArena")
+st.title("🎟️ N-EventArena")
 st.caption("Discover sports, live music, festivals and affordable activities.")
 if "messages" not in st.session_state:
-    opening = "Hello! Welcome to EventArena.\n\nChoose one of the questions below, select **Help**, or type your own question."
+    opening = ("Hello! Welcome to N-EventArena.\n\nHere are some questions you can ask:\n\n"
+               + "\n".join(f"{i}. {question}" for i, (_, question) in enumerate(SUGGESTIONS, 1))
+               + "\n\nSelect **Help** or type your own question.")
     st.session_state.messages = [{"role":"assistant","content":opening}]
 
 for message in st.session_state.messages:
@@ -110,13 +114,6 @@ def submit_message(text):
     response, route, confidence = respond(text)
     st.session_state.messages.append({"role":"user","content":text})
     st.session_state.messages.append({"role":"assistant","content":response,"route":route,"confidence":confidence})
-
-st.caption("Choose a question to see the matching event information.")
-columns = st.columns(2)
-for index, (label, question) in enumerate(SUGGESTIONS):
-    if columns[index % 2].button(question, key=f"suggestion_{index}", use_container_width=True):
-        submit_message(question)
-        st.rerun()
 
 help_col, _ = st.columns(2)
 if help_col.button("Help", key="help_button", use_container_width=True):
