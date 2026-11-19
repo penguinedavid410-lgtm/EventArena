@@ -1,12 +1,12 @@
-# EventArena — Portfolio Project 2, Part 2
+# N-EventArena — Portfolio Project 2, Part 2
 
-EventArena is a focused Streamlit chatbot for event discovery. It combines keyword rules with a TF-IDF and Logistic Regression intent classifier, plus a low-confidence fallback.
+N-EventArena is a focused Streamlit chatbot for event discovery. It combines keyword rules with a TF-IDF and Logistic Regression intent classifier, plus a low-confidence fallback.
 
 ## Opening message and suggested questions
 
 The chatbot greets the user with:
 
-> Hello! Welcome to EventArena.
+> Hello! Welcome to N-EventArena.
 >
 > Do you want to ask about one of these suggestions?
 
