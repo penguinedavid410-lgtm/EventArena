@@ -67,9 +67,7 @@ def event_details(message):
 
 def answer(intent, message):
     if intent == "greeting":
-        return ("Hello! Welcome to EventArena.\n\nDo you want to ask about one of these suggestions?\n\n"
-                + "\n".join(f"{i}. **{question}**" for i, (_, question) in enumerate(SUGGESTIONS, 1))
-                + "\n\nYou can also select **Help** or type your own question.")
+        return ("Hello! Welcome to EventArena.\n\nChoose one of the questions below, select **Help**, or type your own question.")
     if intent == "help":
         return ("**How EventArena can help**\n\nChoose one of the five suggested questions to browse sports, concerts, "
                 "festivals, affordable activities, or event details. You can type an event name to see its sample date, "
@@ -99,9 +97,7 @@ def respond(message):
 st.title("🎟️ EventArena")
 st.caption("Discover sports, live music, festivals and affordable activities.")
 if "messages" not in st.session_state:
-    opening = ("Hello! Welcome to EventArena.\n\nDo you want to ask about one of these suggestions?\n\n"
-               + "\n".join(f"{i}. **{question}**" for i, (_, question) in enumerate(SUGGESTIONS, 1))
-               + "\n\nYou can also select **Help** or type your own question.")
+    opening = "Hello! Welcome to EventArena.\n\nChoose one of the questions below, select **Help**, or type your own question."
     st.session_state.messages = [{"role":"assistant","content":opening}]
 
 for message in st.session_state.messages:
